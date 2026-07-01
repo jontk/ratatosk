@@ -124,31 +124,6 @@ func TestScanSkipsNonexistentGlob(t *testing.T) {
 	}
 }
 
-func TestExpandTilde(t *testing.T) {
-	home := os.Getenv("HOME")
-	if home == "" {
-		t.Skip("HOME not set")
-	}
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"~/src", home + "/src"},
-		{"~", home},
-		{"/absolute/path", "/absolute/path"},
-		{"relative/path", "relative/path"},
-		{"~user/path", "~user/path"}, // only bare ~ is expanded
-	}
-	for _, tt := range tests {
-		t.Run(tt.input, func(t *testing.T) {
-			got := expandTilde(tt.input)
-			if got != tt.expected {
-				t.Errorf("expandTilde(%q) = %q, want %q", tt.input, got, tt.expected)
-			}
-		})
-	}
-}
-
 func TestWindowName(t *testing.T) {
 	tests := []struct {
 		name         string

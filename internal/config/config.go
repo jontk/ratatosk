@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/jontk/ratatosk/internal/pathutil"
 )
 
 type Config struct {
@@ -196,16 +198,6 @@ func WriteDefault(path string) error {
 	return os.WriteFile(path, []byte(header+string(data)), 0644)
 }
 
-func expandTilde(path string) string {
-	if path == "~" || strings.HasPrefix(path, "~/") {
-		home := os.Getenv("HOME")
-		if home != "" {
-			return home + path[1:]
-		}
-	}
-	return path
-}
-
 func Validate(cfg *Config) []string {
 	var errs []string
 
@@ -213,7 +205,7 @@ func Validate(cfg *Config) []string {
 		errs = append(errs, "source_dirs is empty")
 	}
 	for _, dir := range cfg.SourceDirs {
-		expanded := expandTilde(dir)
+		expanded := pathutil.ExpandTilde(dir)
 		// For glob patterns, validate the parent directory exists.
 		if strings.ContainsAny(expanded, "*?[") {
 			parent := filepath.Dir(expanded)
