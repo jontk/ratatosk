@@ -17,9 +17,24 @@ import (
 
 var profile string
 
+// Build metadata, overridden at release time via -ldflags "-X main.version=...".
+var (
+	version = "dev"
+	commit  = ""
+	date    = ""
+)
+
 func main() {
 	// Parse global flags
 	args := parseGlobalFlags(os.Args[1:])
+
+	// --version / -v short-circuits before command dispatch.
+	for _, a := range args {
+		if a == "--version" || a == "-v" {
+			printVersion()
+			return
+		}
+	}
 
 	// Auto-detect profile from current tmux session if not specified
 	if profile == "" && tmux.InsideTmux() {
@@ -48,6 +63,8 @@ func main() {
 		runValidate()
 	case "config":
 		runConfig()
+	case "version":
+		printVersion()
 	case "help":
 		printHelp()
 	default:
@@ -335,6 +352,16 @@ func runConfig() {
 	}
 }
 
+func printVersion() {
+	fmt.Printf("tosk %s\n", version)
+	if commit != "" {
+		fmt.Printf("commit: %s\n", commit)
+	}
+	if date != "" {
+		fmt.Printf("built:  %s\n", date)
+	}
+}
+
 func printHelp() {
 	fmt.Print(`tosk — tmux project manager
 
@@ -345,11 +372,13 @@ Usage:
   tosk switch       Switch between profile sessions
   tosk validate     Validate config file
   tosk config       Open config in $EDITOR
+  tosk version      Show version information
   tosk help         Show this help
 
 Flags:
   -p <profile>    Use a named profile (e.g. tosk -p work uses work.yaml)
   --cc            Force iTerm2 control mode (-CC) on attach
+  --version, -v   Show version information
 
 Config: ~/.config/ratatosk/config.yaml
        ~/.config/ratatosk/<profile>.yaml
