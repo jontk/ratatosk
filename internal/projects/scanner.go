@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jontk/ratatosk/internal/pathutil"
 )
 
 type Project struct {
@@ -28,23 +30,12 @@ func (p Project) WindowName() string {
 	return p.Name
 }
 
-// expandTilde replaces a leading ~ with the user's home directory.
-func expandTilde(path string) string {
-	if path == "~" || strings.HasPrefix(path, "~/") {
-		home := os.Getenv("HOME")
-		if home != "" {
-			return home + path[1:]
-		}
-	}
-	return path
-}
-
 // resolveSourceDir expands tildes and globs in a source_dirs entry,
 // returning the matched directory paths. Non-glob entries that are
 // directories are returned as-is. Non-directory matches and hidden
 // directories (starting with '.') are skipped.
 func resolveSourceDir(pattern string) ([]string, error) {
-	pattern = expandTilde(pattern)
+	pattern = pathutil.ExpandTilde(pattern)
 
 	// If no glob characters, treat as a literal path.
 	if !strings.ContainsAny(pattern, "*?[") {
