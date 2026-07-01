@@ -75,7 +75,9 @@ The `--cc` flag enables iTerm2 control mode (`tmux -CC`), which gives you native
 
 ## Configuration
 
-Config lives at `~/.config/ratatosk/config.yaml` and is created with defaults on first run.
+Config lives at `~/.config/ratatosk/config.yaml` and is created with defaults on first run. The location honors `$XDG_CONFIG_HOME` if set.
+
+> On macOS, earlier versions stored config under `~/Library/Application Support/ratatosk`. If that directory already exists it continues to be used; new installs use `~/.config/ratatosk`. Move the files there to adopt the new location.
 
 See [config.example.yaml](config.example.yaml) for a fully commented example.
 

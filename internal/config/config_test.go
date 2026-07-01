@@ -305,6 +305,36 @@ func TestPathForProfile(t *testing.T) {
 	}
 }
 
+func TestConfigDirHonorsXDG(t *testing.T) {
+	tmp := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", tmp)
+
+	want := filepath.Join(tmp, "ratatosk")
+	if got := ConfigDir(); got != want {
+		t.Errorf("ConfigDir() = %q, want %q", got, want)
+	}
+
+	wantPath := filepath.Join(want, "config.yaml")
+	if got := PathForProfile(""); got != wantPath {
+		t.Errorf("PathForProfile(\"\") = %q, want %q", got, wantPath)
+	}
+	wantWork := filepath.Join(want, "work.yaml")
+	if got := PathForProfile("work"); got != wantWork {
+		t.Errorf("PathForProfile(\"work\") = %q, want %q", got, wantWork)
+	}
+}
+
+func TestConfigDirFallsBackToHomeConfig(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", "")
+	t.Setenv("HOME", home)
+
+	want := filepath.Join(home, ".config", "ratatosk")
+	if got := ConfigDir(); got != want {
+		t.Errorf("ConfigDir() = %q, want %q", got, want)
+	}
+}
+
 func boolPtr(b bool) *bool { return &b }
 
 func contains(s, substr string) bool {

@@ -43,26 +43,52 @@ func DefaultPath() string {
 	return PathForProfile("")
 }
 
-func PathForProfile(profile string) string {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		configDir = filepath.Join(os.Getenv("HOME"), ".config")
+// ConfigDir returns ratatosk's configuration directory. It prefers
+// $XDG_CONFIG_HOME/ratatosk (falling back to ~/.config/ratatosk) on all
+// platforms so the location matches the documented path.
+//
+// For backwards compatibility it honors a pre-existing config in the legacy
+// os.UserConfigDir() location (e.g. ~/Library/Application Support/ratatosk on
+// macOS): if the preferred directory does not yet exist but the legacy one
+// does, the legacy directory is used so existing installs keep working.
+func ConfigDir() string {
+	preferred := filepath.Join(configBase(), "ratatosk")
+
+	if _, err := os.Stat(preferred); os.IsNotExist(err) {
+		if legacy, err := os.UserConfigDir(); err == nil {
+			legacyDir := filepath.Join(legacy, "ratatosk")
+			if legacyDir != preferred {
+				if _, err := os.Stat(legacyDir); err == nil {
+					return legacyDir
+				}
+			}
+		}
 	}
+
+	return preferred
+}
+
+// configBase returns the XDG-style config base directory:
+// $XDG_CONFIG_HOME if set, otherwise ~/.config.
+func configBase() string {
+	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
+		return xdg
+	}
+	return filepath.Join(os.Getenv("HOME"), ".config")
+}
+
+func PathForProfile(profile string) string {
 	name := "config.yaml"
 	if profile != "" {
 		name = profile + ".yaml"
 	}
-	return filepath.Join(configDir, "ratatosk", name)
+	return filepath.Join(ConfigDir(), name)
 }
 
 // ListProfiles returns all available profiles by scanning the config dir.
 // The default profile is returned as "" with session name from config.yaml.
 func ListProfiles() ([]Profile, error) {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		configDir = filepath.Join(os.Getenv("HOME"), ".config")
-	}
-	dir := filepath.Join(configDir, "ratatosk")
+	dir := ConfigDir()
 
 	entries, err := os.ReadDir(dir)
 	if err != nil {

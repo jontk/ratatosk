@@ -12,15 +12,11 @@ type State struct {
 }
 
 func statePath(profile string) string {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		configDir = filepath.Join(os.Getenv("HOME"), ".config")
-	}
 	name := "default.yaml"
 	if profile != "" {
 		name = profile + ".yaml"
 	}
-	return filepath.Join(configDir, "ratatosk", "state", name)
+	return filepath.Join(ConfigDir(), "state", name)
 }
 
 func LoadState(profile string) *State {
