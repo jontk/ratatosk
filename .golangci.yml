@@ -1,0 +1,23 @@
+version: "2"
+
+# Standard linter set (errcheck, govet, ineffassign, staticcheck, unused) plus
+# misspell. errcheck and the staticcheck quick-fix QF1012 are temporarily
+# relaxed because the current code intentionally ignores some tmux errors and
+# uses WriteString(fmt.Sprintf(...)); these are addressed in a follow-up PR that
+# adds debug logging for swallowed errors, after which they should be re-enabled.
+linters:
+  default: standard
+  disable:
+    - errcheck # TODO: re-enable after the debug-logging PR handles swallowed errors
+  enable:
+    - misspell
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - -QF1012 # TODO: fix WriteString(fmt.Sprintf(...)) then drop this exclusion
+        - -ST1000 # package-comment nag; not enforced for this project
+
+formatters:
+  enable:
+    - gofmt
