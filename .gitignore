@@ -1,3 +1,6 @@
 /tp
 /tosk
 dist/
+
+# Local demo recordings and vhs tapes (not tracked)
+demos/
